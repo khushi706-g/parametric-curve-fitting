@@ -158,11 +158,10 @@ $$
 we obtain:
 
 $$
-\boxed{
+\displaystyle
 -(x-X)\sin(\theta)+(y-42)\cos(\theta)
 =
 e^{Mt}\sin(0.3t)
-}
 $$
 
 This relationship is used to estimate the unknown parameters.
