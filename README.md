@@ -301,7 +301,7 @@ The assignment also provides an interactive **Desmos visualization** of the para
 
 ### Interactive Graph
 
-[**Open Parametric Curve in Desmos**](https://www.desmos.com/calculator/rfj91yrxob)
+[**Open Parametric Curve in Desmos**](https://www.desmos.com/calculator/uzqdmxsmyd)
 
 The Desmos visualization can be used to:
 
