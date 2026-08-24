@@ -1,0 +1,3 @@
+theta = 30 degrees
+M = 0.03
+X = 55
