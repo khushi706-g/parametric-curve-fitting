@@ -2,9 +2,9 @@
 
 ## Research and Development / AI Assignment
 
-This repository contains the solution for the **Research and Development / AI assignment** involving parameter estimation for a given parametric curve.
+This repository contains the solution to the **Research and Development / AI assignment** for estimating the unknown parameters of a given parametric curve.
 
-The objective is to determine the unknown parameters **θ, M, and X** from a given set of `(x, y)` points that lie on the curve.
+The objective is to determine the values of the unknown parameters **θ, M, and X** using the set of `(x, y)` points provided in the dataset.
 
 ---
 
@@ -12,39 +12,45 @@ The objective is to determine the unknown parameters **θ, M, and X** from a giv
 
 The assignment provides the following parametric equation of a curve:
 
-[
-x = t\cos(\theta) - e^{M|t|}\sin(0.3t)\sin(\theta) + X
-]
+$$
+x(t) =
+t\cos(\theta)
+-------------
 
-[
-y = 42 + t\sin(\theta) + e^{M|t|}\sin(0.3t)\cos(\theta)
-]
+e^{M|t|}\sin(0.3t)\sin(\theta)
++
+X
+$$
 
-The dataset contains points that lie on this curve.
+$$
+y(t) =
+42
++
+t\sin(\theta)
++
+e^{M|t|}\sin(0.3t)\cos(\theta)
+$$
 
 The task is to determine the unknown parameters:
 
-[
-\boxed{\theta,\ M,\ X}
-]
+$$
+\theta,\ M,\ X
+$$
+
+from the given set of points lying on the curve.
 
 ---
 
 ## Parameter Constraints
 
-The assignment specifies the following ranges for the unknown parameters:
+The assignment specifies the following ranges:
 
-| Parameter | Range                         |
-| --------- | ----------------------------- |
-| θ         | (0^\circ < \theta < 50^\circ) |
-| M         | (-0.05 < M < 0.05)            |
-| X         | (0 < X < 100)                 |
-
-The parameter `t` has the following range:
-
-[
-6 < t < 60
-]
+| Parameter | Constraint                    |
+| :-------: | :---------------------------- |
+|  $\theta$ | $0^\circ < \theta < 50^\circ$ |
+|    $M$    | $-0.05 < M < 0.05$            |
+|    $X$    | $0 < X < 100$                 |
+|    $t$    | $6 < t < 60$                  |
 
 These constraints are used during the parameter estimation process.
 
@@ -52,87 +58,117 @@ These constraints are used during the parameter estimation process.
 
 ## Dataset
 
-The provided dataset contains the list of points that lie on the given curve.
+The assignment provides a dataset containing points that lie on the given curve.
 
-The dataset is stored in:
+The dataset used in this project is:
 
 ```text
 data/xy_data.csv
 ```
 
-It contains two columns:
+The dataset contains two columns:
 
 ```text
 x
 y
 ```
 
-There are **1500 observations** in the supplied dataset.
-
 Each row represents one point:
 
-[
-(x_i,y_i)
-]
+$$
+(x_i,\ y_i)
+$$
 
-The dataset does not directly provide the corresponding value of `t` for each point, so `t` is handled as a parameter along the curve.
+The supplied dataset contains **1500 points**.
 
 ---
 
 ## Objective
 
-The goal is to find values of:
+The objective is to find values of $\theta$, $M$, and $X$ such that the curve generated using these parameters matches the supplied data as closely as possible.
+
+According to the assignment, the primary evaluation criterion is:
+
+> **The L1 distance between uniformly sampled points between the expected and predicted curve.**
+
+Therefore, the parameter estimation process aims to minimize the distance between the expected curve and the predicted curve.
+
+---
+
+# Methodology
+
+The solution consists of the following steps:
 
 ```text
-θ
-M
-X
+Load Dataset
+     ↓
+Visualize Given Points
+     ↓
+Define Parametric Curve
+     ↓
+Mathematical Transformation
+     ↓
+Define L1 Loss
+     ↓
+Parameter Optimization
+     ↓
+Generate Predicted Curve
+     ↓
+Compare Expected and Predicted Curves
+     ↓
+Obtain θ, M, X
 ```
-
-such that the curve generated using these parameters matches the supplied `(x,y)` data as closely as possible.
-
-The assignment evaluates the solution using:
-
-> **L1 distance between uniformly sampled points between the expected and predicted curve.**
-
-Therefore, the objective is to minimize the distance between the supplied curve and the curve generated using the estimated parameters.
 
 ---
 
-## Approach
+## 1. Load the Dataset
 
-The solution follows these steps:
-
-### 1. Load the dataset
-
-The supplied CSV file is loaded using Pandas.
+The dataset is loaded using Pandas:
 
 ```python
+import pandas as pd
+
 df = pd.read_csv("data/xy_data.csv")
+
+x_data = df["x"].values
+y_data = df["y"].values
 ```
 
-The `x` and `y` values are extracted as arrays.
+The dataset contains 1500 `(x, y)` observations.
 
 ---
 
-### 2. Visualize the data
+## 2. Visualize the Dataset
 
-The supplied `(x,y)` points are plotted using Matplotlib.
+The supplied points are plotted using Matplotlib to understand the shape of the curve.
 
-This provides a visual representation of the curve and helps verify that the data forms a continuous parametric trajectory.
+```python
+import matplotlib.pyplot as plt
+
+plt.scatter(x_data, y_data, s=8)
+
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Given XY Data")
+
+plt.show()
+```
 
 ---
 
-### 3. Implement the parametric equation
+## 3. Implement the Parametric Curve
 
-The given mathematical equation is implemented directly in Python.
+The given parametric equations are implemented directly:
 
 ```python
 def parametric_curve(t, theta_deg, M, X):
 
     theta = np.deg2rad(theta_deg)
 
-    amplitude = np.exp(M * np.abs(t)) * np.sin(0.3 * t)
+    amplitude = (
+        np.exp(M * np.abs(t))
+        * np.sin(0.3 * t)
+    )
 
     x = (
         t * np.cos(theta)
@@ -149,84 +185,144 @@ def parametric_curve(t, theta_deg, M, X):
     return x, y
 ```
 
-Since NumPy trigonometric functions use radians, `θ` is converted from degrees to radians before calculating sine and cosine.
+Since NumPy's `sin()` and `cos()` functions use radians, $\theta$ is converted from degrees to radians before evaluating the equations.
 
 ---
 
-## Mathematical Transformation
+# Mathematical Transformation
 
-The original equations can be rewritten by defining:
+The original equations are:
 
-[
-A=e^{Mt}\sin(0.3t)
-]
+$$
+x-X =
+t\cos(\theta)
+-------------
 
-Because:
+e^{M|t|}\sin(0.3t)\sin(\theta)
+$$
 
-[
-6<t<60
-]
+$$
+y-42 =
+t\sin(\theta)
++
+e^{M|t|}\sin(0.3t)\cos(\theta)
+$$
 
-we have:
+Since the assignment specifies:
 
-[
-|t|=t
-]
+$$
+6 < t < 60
+$$
+
+we know that:
+
+$$
+|t| = t
+$$
+
+Define:
+
+$$
+A = e^{Mt}\sin(0.3t)
+$$
+
+The equations become:
+
+$$
+x-X = t\cos(\theta)-A\sin(\theta)
+$$
+
+$$
+y-42 = t\sin(\theta)+A\cos(\theta)
+$$
+
+These equations can be viewed as a rotation of the two quantities $t$ and $A$.
+
+---
+
+## Recovering `t`
+
+Multiplying the first equation by $\cos(\theta)$ and the second by $\sin(\theta)$ and adding them gives:
+
+$$
+(x-X)\cos(\theta)
++
+(y-42)\sin(\theta)
+==================
+
+t
+$$
 
 Therefore:
 
-[
-x-X=t\cos(\theta)-A\sin(\theta)
-]
-
-[
-y-42=t\sin(\theta)+A\cos(\theta)
-]
-
-These equations represent a rotation of the quantities `t` and `A`.
-
-Rotating the coordinates back gives:
-
-[
+$$
 \boxed{
-t=(x-X)\cos(\theta)+(y-42)\sin(\theta)
+t =
+(x-X)\cos(\theta)
++
+(y-42)\sin(\theta)
 }
-]
+$$
 
-This allows an estimated value of `t` to be obtained for every observed `(x,y)` point for a candidate pair `(θ,X)`.
-
-The transformed amplitude is:
-
-[
-\boxed{
-A=-(x-X)\sin(\theta)+(y-42)\cos(\theta)
-}
-]
-
-The model requires:
-
-[
-A=e^{Mt}\sin(0.3t)
-]
-
-Therefore, the unknown parameters can be estimated by finding the values of `θ`, `M`, and `X` that make the observed and predicted values agree.
+This allows the corresponding value of $t$ to be estimated for every observed `(x, y)` point for a candidate $\theta$ and $X$.
 
 ---
 
-## L1 Loss Function
+## Recovering the Oscillatory Component
 
-For a candidate set of parameters, the corresponding predicted point is calculated.
+Similarly, rotating the coordinates in the perpendicular direction gives:
 
-The L1 error for a point is:
+$$
+A =
+-(x-X)\sin(\theta)
++
+(y-42)\cos(\theta)
+$$
 
-[
-|x-x_{pred}|+|y-y_{pred}|
-]
+Since:
 
-The objective function used for optimization is the mean L1 error:
+$$
+A=e^{Mt}\sin(0.3t)
+$$
 
-[
-L1=
+we obtain:
+
+$$
+-(x-X)\sin(\theta)
++
+(y-42)\cos(\theta)
+==================
+
+e^{Mt}\sin(0.3t)
+$$
+
+This relationship is used to estimate $M$ together with $\theta$ and $X$.
+
+---
+
+# L1 Loss Function
+
+For a candidate set of parameters:
+
+$$
+(\theta,M,X)
+$$
+
+the corresponding values of $t$ are calculated and the predicted curve points are generated.
+
+For each observed point, the L1 distance is:
+
+$$
+L_i =
+|x_i-x_{pred,i}|
++
+|y_i-y_{pred,i}|
+$$
+
+The overall loss is calculated as:
+
+$$
+L =
 \frac{1}{N}
 \sum_{i=1}^{N}
 \left(
@@ -234,82 +330,115 @@ L1=
 +
 |y_i-y_{pred,i}|
 \right)
-]
+$$
 
-The optimization attempts to minimize this value.
+The optimization process attempts to minimize this value.
 
-A lower L1 value indicates that the predicted curve is closer to the supplied data.
+A smaller L1 value indicates a better match between the predicted curve and the supplied data.
 
 ---
 
-## Parameter Optimization
+# Parameter Optimization
 
-The unknown parameters are optimized within the ranges specified in the assignment.
+The unknown parameters are searched within the ranges specified in the assignment:
 
-The parameter search space is:
+$$
+0 < \theta < 50^\circ
+$$
 
-```text
-θ : 0 to 50 degrees
-M : -0.05 to 0.05
-X : 0 to 100
-```
+$$
+-0.05 < M < 0.05
+$$
 
-The implementation uses **Differential Evolution** from SciPy to search the parameter space.
+$$
+0 < X < 100
+$$
+
+The implementation uses **Differential Evolution** from SciPy for nonlinear parameter optimization.
 
 ```python
 from scipy.optimize import differential_evolution
 ```
 
-Differential Evolution is suitable here because the curve contains nonlinear and oscillatory terms, including:
-
-```text
-exp(M*|t|)
-sin(0.3*t)
-sin(theta)
-cos(theta)
-```
-
-The optimization returns the parameter combination that minimizes the defined L1 objective.
+The optimizer searches the allowed parameter space and identifies the parameter combination that minimizes the L1 loss.
 
 ---
 
-## Results
+# Results
 
-Using the supplied dataset, the recovered parameters are:
+The estimated parameters obtained from the supplied dataset are:
 
-```text
-θ = 30°
-M = 0.03
-X = 55
-```
+| Parameter | Estimated Value |
+| :-------: | --------------: |
+|  $\theta$ |         **30°** |
+|    $M$    |        **0.03** |
+|    $X$    |          **55** |
 
 Therefore:
 
-[
-\boxed{\theta=30^\circ}
-]
+$$
+\boxed{\theta = 30^\circ}
+$$
 
-[
-\boxed{M=0.03}
-]
+$$
+\boxed{M = 0.03}
+$$
 
-[
-\boxed{X=55}
-]
-
-All three values satisfy the parameter ranges specified in the assignment.
+$$
+\boxed{X = 55}
+$$
 
 ---
 
-## Curve Visualization
+# Final Parametric Curve
 
-The final estimated parameters are substituted into the original parametric equation.
+Substituting the estimated parameters into the original equations gives:
 
-A uniformly sampled range of `t` values between 6 and 60 is used to generate the predicted curve.
+$$
+x(t)
+====
 
-The supplied points and predicted curve are plotted together to visually verify the quality of the fit.
+## t\cos(30^\circ)
 
-The resulting plot is available at:
+e^{0.03|t|}
+\sin(0.3t)
+\sin(30^\circ)
++
+55
+$$
+
+$$
+y(t)
+====
+
+42
++
+t\sin(30^\circ)
++
+e^{0.03|t|}
+\sin(0.3t)
+\cos(30^\circ)
+$$
+
+where:
+
+$$
+6 < t < 60
+$$
+
+---
+
+# Visualization
+
+The final parameters are used to generate a uniformly sampled curve over the range:
+
+$$
+6 \leq t \leq 60
+$$
+
+The generated curve is then compared with the supplied `(x,y)` points.
+
+The resulting visualization is available at:
 
 ```text
 plots/fitted_curve.png
@@ -317,7 +446,7 @@ plots/fitted_curve.png
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```text
 parametric-curve-parameter-estimation/
@@ -338,35 +467,33 @@ parametric-curve-parameter-estimation/
 └── README.md
 ```
 
-### Files
+### `data/xy_data.csv`
 
-**`data/xy_data.csv`**
+Contains the `(x,y)` points supplied for the assignment.
 
-Contains the supplied `(x,y)` points.
+### `main.py`
 
-**`main.py`**
+Contains the complete Python implementation for parameter estimation.
 
-Contains the complete Python implementation for parameter estimation and curve visualization.
+### `solution.ipynb`
 
-**`solution.ipynb`**
+Contains the step-by-step analysis, mathematical derivation, optimization and visualization.
 
-Jupyter Notebook containing the step-by-step implementation and analysis.
+### `plots/fitted_curve.png`
 
-**`plots/fitted_curve.png`**
+Contains the visualization of the supplied data and fitted parametric curve.
 
-Visualization of the supplied data and recovered parametric curve.
+### `results/final_parameters.txt`
 
-**`results/final_parameters.txt`**
+Contains the final estimated values of $\theta$, $M$, and $X$.
 
-Contains the final estimated values of `θ`, `M`, and `X`.
+### `requirements.txt`
 
-**`requirements.txt`**
-
-Contains the Python dependencies required to run the project.
+Contains the Python packages required to run the project.
 
 ---
 
-## Installation
+# Installation
 
 Clone the repository:
 
@@ -374,13 +501,13 @@ Clone the repository:
 git clone https://github.com/<your-username>/parametric-curve-parameter-estimation.git
 ```
 
-Move into the project directory:
+Navigate to the project directory:
 
 ```bash
 cd parametric-curve-parameter-estimation
 ```
 
-Install the required libraries:
+Install the dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -388,9 +515,9 @@ pip install -r requirements.txt
 
 ---
 
-## Running the Project
+# Running the Project
 
-### Using Jupyter Notebook
+## Jupyter Notebook
 
 Start Jupyter:
 
@@ -406,9 +533,9 @@ solution.ipynb
 
 and run the cells sequentially.
 
-### Using Python
+## Python Script
 
-Run:
+Alternatively, run:
 
 ```bash
 python main.py
@@ -417,61 +544,35 @@ python main.py
 The program will:
 
 1. Load the dataset.
-2. Estimate `θ`, `M`, and `X`.
-3. Calculate the L1 error.
-4. Generate the fitted curve.
-5. Display the comparison plot.
-6. Save the final parameters.
+2. Define the parametric curve.
+3. Estimate the unknown parameters.
+4. Calculate the L1 loss.
+5. Generate the fitted curve.
+6. Display the comparison plot.
+7. Save the final parameters.
 
 ---
 
-## Final Answer
+# Conclusion
 
-The estimated unknown variables are:
+The unknown parameters of the given parametric curve were estimated using mathematical transformation and constrained nonlinear optimization.
 
-| Parameter | Estimated Value |
-| --------- | --------------: |
-| θ         |         **30°** |
-| M         |        **0.03** |
-| X         |          **55** |
+The final estimated parameters are:
 
-Thus, the final parameterized curve is:
+$$
+\boxed{
+\theta = 30^\circ,\quad
+M = 0.03,\quad
+X = 55
+}
+$$
 
-[
-x(t)=t\cos(30^\circ)
--e^{0.03|t|}\sin(0.3t)\sin(30^\circ)
-+55
-]
-
-[
-y(t)=42+t\sin(30^\circ)
-+e^{0.03|t|}\sin(0.3t)\cos(30^\circ)
-]
-
-for:
-
-[
-6<t<60
-]
+The resulting parametric curve closely matches the supplied dataset.
 
 ---
 
-## Conclusion
+# Reference
 
-The unknown parameters of the supplied parametric curve were estimated by combining mathematical transformation, constrained nonlinear optimization, and L1-based curve fitting.
+This project is based on the **Research and Development / AI assignment** provided for the parametric curve parameter estimation task.
 
-The final recovered parameters are:
-
-[
-\boxed{\theta=30^\circ,\quad M=0.03,\quad X=55}
-]
-
-The predicted curve closely matches the supplied `(x,y)` points.
-
----
-
-## Reference
-
-This implementation is based on the **Research and Development / AI assignment** provided for the parameter estimation task.
-
-The assignment specifies the unknown parameters, their ranges, the supplied `xy_data.csv`, and the L1-distance-based assessment criterion.
+The assignment specifies the parametric equation, parameter ranges, supplied `xy_data.csv`, and evaluation based on the L1 distance between uniformly sampled expected and predicted curve points.
