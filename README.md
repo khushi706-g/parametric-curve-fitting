@@ -357,8 +357,3 @@ These values satisfy the parameter constraints specified in the assignment and p
 
 ---
 
-## Assignment Reference
-
-This project is based on the **Research and Development / AI Assignment** provided for the parametric curve parameter estimation problem.
-
-The assignment specifies the parametric equations, unknown parameters, parameter ranges, dataset, and evaluation criteria.
