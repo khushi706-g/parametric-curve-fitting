@@ -158,15 +158,10 @@ $$
 we obtain:
 
 $$
-\displaystyle
--(x-X)\sin(\theta)+(y-42)\cos(\theta)
-=
-e^{Mt}\sin(0.3t)
+-(x-X)\sin(\theta)+(y-42)\cos(\theta)=e^{Mt}\sin(0.3t)
 $$
 
 This relationship is used to estimate the unknown parameters.
-
----
 
 # L1 Distance
 
